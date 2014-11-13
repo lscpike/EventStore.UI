@@ -5,13 +5,22 @@ define(['./_index'], function (app) {
 	'use strict';
 
     return app.config([
-    '$stateProvider',
-    function ($stateProvider) {
-
+    '$stateProvider','$locationProvider',
+    function ($stateProvider, $locationProvider) {
+        $locationProvider.html5Mode({
+            enabled:true,
+            requireBase: false
+        });
         $stateProvider
             // ========================================STREAMS============
             .state('streams', {
                 url: 'streams',
+                parent: 'app',
+                templateUrl: 'streams.tpl.html',
+                abstract: true
+            })
+            .state('streamsUrl', {
+                url: 'streams/{streamId}',
                 parent: 'app',
                 templateUrl: 'streams.tpl.html',
                 abstract: true
