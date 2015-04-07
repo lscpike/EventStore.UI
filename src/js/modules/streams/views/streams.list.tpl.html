@@ -20,8 +20,10 @@
 			</thead>
 			<tbody>
 
-				<tr ng-repeat="stream in createdStreams">
+				<tr ng-repeat="stream in createdStreams track by $index">
 					<td>
+						<a ng-if="!stream.pinned" ng-click="pinStream('createdStreams', stream)"><img src="images/pin.png" height="16" width="16" alt="pin"></a>
+						<a ng-if="stream.pinned" ng-click="unpinStream('createdStreams', stream)"><img src="images/unpin.png" height="16" width="16" alt="unpin"></a>
 						<a ui-sref="^.item.events({streamId: stream.streamId})">{{ stream.streamId }}</a>
 					</td>
 				</tr>
@@ -42,8 +44,10 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr ng-repeat="stream in changedStreams">
+				<tr ng-repeat="stream in changedStreams track by $index">
 					<td>
+						<a ng-if="!stream.pinned" ng-click="pinStream('changedStreams', stream)"><img src="images/pin.png" height="16" width="16" alt="pin"></a>
+						<a ng-if="stream.pinned" ng-click="unpinStream('changedStreams', stream)"><img src="images/unpin.png" height="16" width="16" alt="unpin"></a>
 						<a ui-sref="^.item.events({streamId: stream.streamId})">{{ stream.streamId }}</a>
 					</td>
 				</tr>

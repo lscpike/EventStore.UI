@@ -34,14 +34,87 @@ define(['./_module'], function (app) {
 				$state.go('^.item.events', { streamId: $scope.search });
 			};
 
+			function streamExistInCollection(streams, streamId){
+				for(var index in streams){
+					if(streams[index].streamId == streamId){
+						return true;
+					}
+				}
+				return false;
+			}
+
+			function addStreamToCollection(streams, stream){
+				if(!streamExistInCollection(streams, stream.streamId)){
+					stream.pinned = true;
+					streams.push(stream);
+				}
+				return streams;
+			}
+
+			function removeStreamFromCollection(streams, stream){
+				for(var index in streams){
+					if(streams[index].streamId == stream.streamId){
+						streams.splice(index, 1);
+						return index;
+					}
+				}
+				return -1;
+			}
+
+			function getStreamsFromStorage(streamContext){
+				var streamsForContext = window.localStorage.getItem(streamContext);
+				if(!streamsForContext){
+					streamsForContext = [];
+				}else{
+					streamsForContext = JSON.parse(streamsForContext);
+				}
+				return streamsForContext;
+			}
+
+			function unique(arr){
+				var a = arr.concat();
+			    for(var i=0; i<a.length; ++i) {
+			        for(var j=i+1; j<a.length; ++j) {
+			            if(a[i].streamId === a[j].streamId)
+			                a.splice(j--, 1);
+			        }
+			    }
+
+			    return a;
+			}
+
+			function mergeWithPinnedStreams(streamContext, streamsToMerge){
+				var streamsForContext = getStreamsFromStorage(streamContext);
+				var mergedStreams = streamsForContext.concat(streamsToMerge);
+				var uniqueStreams = unique(mergedStreams);
+				return unique(mergedStreams);
+			}
+
+			$scope.pinStream = function (streamContext, stream) {
+				var streamsForContext = getStreamsFromStorage(streamContext);
+				streamsForContext = addStreamToCollection(streamsForContext, stream);
+				window.localStorage.setItem(streamContext, JSON.stringify(streamsForContext));
+			};
+
+			$scope.unpinStream = function (streamContext, stream){
+				var streamsForContext = getStreamsFromStorage(streamContext);
+				var removedIndex = removeStreamFromCollection(streamsForContext, stream);
+				window.localStorage.setItem(streamContext, JSON.stringify(streamsForContext));
+				$scope[streamContext][removedIndex].pinned = false;
+				console.log('changed', $scope[removedIndex]);
+				$scope[streamContext] = mergeWithPinnedStreams(streamContext, $scope[streamContext]);
+			}
+
 			streamsService.recentlyChangedStreams()
 			.success(function (data) {
 				$scope.changedStreams = filter(data.entries);
+				$scope.changedStreams = mergeWithPinnedStreams('changedStreams', $scope.changedStreams);
 			});
 
 			streamsService.recentlyCreatedStreams()
 			.success(function (data) {
 				$scope.createdStreams = filter(data.entries);
+				$scope.createdStreams = mergeWithPinnedStreams('createdStreams', $scope.createdStreams);
 			});
 		}
 	]);
