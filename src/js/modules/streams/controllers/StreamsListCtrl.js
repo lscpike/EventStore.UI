@@ -3,8 +3,8 @@ define(['./_module'], function (app) {
     'use strict';
 
     return app.controller('StreamsListCtrl', [
-		'$scope', '$state', 'StreamsService',
-		function ($scope, $state, streamsService) {
+		'$scope', '$state', 'StreamsService','$window',
+		function ($scope, $state, streamsService, $window) {
 			
 			function filter (entries) {
 				var filtered = {}, i = 0, length = entries.length, item, result = [];
@@ -62,13 +62,12 @@ define(['./_module'], function (app) {
 			}
 
 			function getStreamsFromStorage(streamContext){
-				var streamsForContext = window.localStorage.getItem(streamContext);
+				var streamsForContext = $window.localStorage.getItem(streamContext);
 				if(!streamsForContext){
-					streamsForContext = [];
+					return [];
 				}else{
-					streamsForContext = JSON.parse(streamsForContext);
+					return JSON.parse(streamsForContext);
 				}
-				return streamsForContext;
 			}
 
 			function unique(arr){
@@ -93,16 +92,19 @@ define(['./_module'], function (app) {
 			$scope.pinStream = function (streamContext, stream) {
 				var streamsForContext = getStreamsFromStorage(streamContext);
 				streamsForContext = addStreamToCollection(streamsForContext, stream);
-				window.localStorage.setItem(streamContext, JSON.stringify(streamsForContext));
+				$window.localStorage.setItem(streamContext, JSON.stringify(streamsForContext));
+				$scope[streamContext] = mergeWithPinnedStreams(streamContext, $scope[streamContext])
 			};
 
 			$scope.unpinStream = function (streamContext, stream){
 				var streamsForContext = getStreamsFromStorage(streamContext);
 				var removedIndex = removeStreamFromCollection(streamsForContext, stream);
-				window.localStorage.setItem(streamContext, JSON.stringify(streamsForContext));
 				$scope[streamContext][removedIndex].pinned = false;
-				console.log('changed', $scope[removedIndex]);
-				$scope[streamContext] = mergeWithPinnedStreams(streamContext, $scope[streamContext]);
+				$window.localStorage.setItem(streamContext, JSON.stringify(streamsForContext));
+				// if(removedIndex != -1){
+				// 	$scope[streamContext][removedIndex].pinned = false;
+				// }
+				// $scope[streamContext] = mergeWithPinnedStreams(streamContext, $scope[streamContext]);
 			}
 
 			streamsService.recentlyChangedStreams()

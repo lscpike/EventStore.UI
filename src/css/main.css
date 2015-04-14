@@ -519,3 +519,23 @@ tbody .table-subheading {
     position:relative;
     bottom:35px;
 }
+
+.pinnable {
+    display: inline-block;
+    width: 1.5rem;
+    text-indent: 100%;
+    overflow: hidden;
+    background-image: url('../images/pin.svg');
+    background-size: 1rem;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.pinnable:focus, .pinnable:hover {
+    background-image: url('../images/pin--hover.svg');
+}
+.pinned {
+    background-image: url('../images/pin--pinned.svg');
+}
+.pinned:focus, .pinned:hover {
+    background-image: url('../images/pin--remove.svg');
+}
